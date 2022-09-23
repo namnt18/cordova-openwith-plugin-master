@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+The MIT License (MIT)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="cordova-openwith-plugin"
+    version="1.0.0">
+
+    <name>OpenWith</name>
+	<description>Cordova "Open With" plugin for iOS and Android</description>
+
+	<license>MIT</license>
+    <keywords>cordova,outsystems,openwith,ios,android</keywords>
+
+    <js-module src="www/openwith.js" name="OpenWith">
+            <clobbers target="OpenWith" />
+        </js-module>
+
+
+    <!-- ios -->
+    <platform name="ios">
+
+        <preference name="IOS_URL_SCHEME" />
+
+
+        <config-file target="config.xml" parent="/*">
+            <feature name="OpenWithPlugin">
+                <param name="ios-package" value="OpenWithPlugin" />
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
+
+        <config-file target="*-Info.plist" parent="CFBundleURLTypes">
+            <array>
+                <dict>
+                    <key>CFBundleURLName</key>
+                    <string>$IOS_URL_SCHEME.shareextension</string>
+                    <key>CFBundleURLSchemes</key>
+                    <array>
+                        <string>$IOS_URL_SCHEME</string>
+                    </array>
+                </dict>
+            </array>
+        </config-file>
+        <config-file parent="com.apple.security.application-groups" target="*-Debug.plist">
+            <array>
+                <string>group.$IOS_URL_SCHEME.shareextension</string>
+            </array>
+          </config-file>
+      <config-file parent="com.apple.security.application-groups" target="*-Release.plist">
+         <array>
+            <string>group.$IOS_URL_SCHEME.shareextension</string>
+         </array>
+      </config-file>
+        <hook type="before_plugin_install" src="hooks/npmInstall.js"/>
+        <hook type="before_plugin_install" src="hooks/ios/copyAndUnzipProvisioningProfiles.js"/>
+        <hook type="before_plugin_install" src="hooks/ios/CopyShareExtension.js" />
+        <hook type="before_plugin_install" src="hooks/ios/copyProvisioningProfiles.js"/>
+
+        <hook type="after_plugin_install" src="hooks/ios/AddTarget.js" />
+
+        <hook type="before_prepare" src="hooks/ios/updateExtensionXcconfig.js"/>
+        <hook type="before_prepare" src="hooks/ios/updateCordovaBuildJs.js"/>
+
+        <hook type="after_prepare" src="hooks/ios/updateCordovaBuildJs.js"/>
+
+        <hook type="before_plugin_uninstall" src="hooks/RemoveTarget.js" />
+
+
+        <source-file src="src/ios/OpenWithPlugin.h" />
+        <source-file src="src/ios/OpenWithPlugin.m" />
+        <header-file src="src/ios/AppDelegate+OpenWithPlugin.h" />
+        <source-file src="src/ios/AppDelegate+OpenWithPlugin.m" />
+
+        <framework src="MobileCoreServices.framework" />
+
+    </platform>
+
+    <!-- android -->
+  <platform name="android">
+
+    <config-file target="AndroidManifest.xml" parent="/manifest/application/activity">
+      <intent-filter>
+        <!-- See https://developer.android.com/guide/topics/manifest/data-element.html -->
+        <data android:mimeType="audio/*" />
+        <data android:mimeType="application/*" />
+        <data android:mimeType="image/*" />
+        <data android:mimeType="text/*" />
+        <action android:name="android.intent.action.SEND" />
+        <!--action android:name="android.intent.action.SEND_MULTIPLE" /-->
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+      </intent-filter>
+    </config-file>
+
+    <!-- Cordova >= 3.0.0 -->
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="OpenWithPlugin">
+        <param name="android-package" value="com.missiveapp.openwith.OpenWithPlugin"/>
+        <param name="onload" value="true"/>
+      </feature>
+    </config-file>
+
+
+    <hook type="before_plugin_install" src="hooks/npmInstall.js"/>
+    <hook type="before_prepare" src="hooks/android/manifest-LegacyStorage.js" />
+
+    <hook type="before_prepare" src="hooks/android/manifest-SingleInstance.js" />
+    <hook type="before_compile" src="hooks/android/manifest-SingleInstance.js" />
+
+    <!-- cordova plugin src files -->
+    <source-file src="src/android/OpenWithPlugin.java" target-dir="src/com/missiveapp/openwith" />
+    <source-file src="src/android/Serializer.java" target-dir="src/com/missiveapp/openwith" />
+  </platform>
+
+</plugin>
